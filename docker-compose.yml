@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  znc:
+    build: .
+    container_name: znc-bouncer
+    restart: unless-stopped
+    ports:
+      - "6667:6667"   # IRC non-SSL port
+      - "6697:6697"   # IRC SSL port
+      - "8085:8080"   # Web interface
+    volumes:
+      - znc_data:/opt/znc/.znc
+      - ./logs:/opt/znc/.znc/moddata/log:rw
+    environment:
+      - ZNC_USER=${ZNC_USER:-admin}
+      - ZNC_PASSWORD=${ZNC_PASSWORD:-changeme}
+      - ZNC_IRC_NICK=${ZNC_IRC_NICK:-znc-user}
+      - ZNC_IRC_SERVER=${ZNC_IRC_SERVER:-irc.libera.chat}
+      - ZNC_IRC_PORT=${ZNC_IRC_PORT:-6697}
+      - ZNC_IRC_SSL=${ZNC_IRC_SSL:-true}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    networks:
+      - znc-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.znc.rule=Host(`znc.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.znc.tls=true"
+      - "traefik.http.services.znc.loadbalancer.server.port=8080"
+
+volumes:
+  znc_data:
+    driver: local
+
+networks:
+  znc-network:
+    driver: bridge

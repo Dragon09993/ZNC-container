@@ -1,0 +1,31 @@
+# Example docker-compose override file
+# Copy this to docker-compose.override.yml for local customizations
+# docker-compose.override.yml is automatically loaded and NOT tracked in git
+
+version: '3.8'
+
+services:
+  znc:
+    # Override ports for different host configurations
+    # ports:
+    #   - "6667:6667"
+    #   - "6697:6697"
+    #   - "8080:8080"   # Different web port
+    
+    # Add additional environment variables
+    # environment:
+    #   - CUSTOM_VAR=value
+    
+    # Mount additional volumes
+    # volumes:
+    #   - ./custom-modules:/opt/znc/.znc/modules
+    
+    # Override restart policy
+    # restart: always
+    
+    # Add resource limits
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M

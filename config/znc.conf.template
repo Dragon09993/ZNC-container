@@ -1,0 +1,59 @@
+// ZNC Configuration Template
+// This file will be generated automatically on first run if it doesn't exist
+
+Version = 1.9
+AnonIPLimit = 10
+ConnectDelay = 5
+MaxBufferSize = 500
+PidFile = /opt/znc/.znc/znc.pid
+ServerThrottle = 30
+SSLCertFile = /opt/znc/.znc/znc.pem
+
+LoadModule = webadmin
+LoadModule = adminlog
+
+<Listener l>
+    AllowIRC = true
+    AllowWeb = false
+    IPv4 = true
+    IPv6 = true
+    Port = 6667
+    SSL = false
+</Listener>
+
+<Listener ssl>
+    AllowIRC = true
+    AllowWeb = false
+    IPv4 = true
+    IPv6 = true
+    Port = 6697
+    SSL = true
+</Listener>
+
+<Listener web>
+    AllowIRC = false
+    AllowWeb = true
+    IPv4 = true
+    IPv6 = true
+    Port = 8080
+    SSL = false
+    URIPrefix = /
+</Listener>
+
+<User admin>
+    Admin = true
+    Nick = znc-user
+    AltNick = znc-user_
+    Ident = znc
+    LoadModule = chansaver
+    LoadModule = controlpanel
+    LoadModule = perform
+
+    <Network local>
+        LoadModule = simple_away
+        Server = localhost +6697
+        
+        <Chan #general>
+        </Chan>
+    </Network>
+</User>

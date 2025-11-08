@@ -1,0 +1,30 @@
+# Environment and Secrets
+.env
+*.env
+!.env.example
+
+# Docker override files (for local development)
+docker-compose.override.yml
+
+# ZNC Data
+logs/
+backups/
+*.pem
+*.key
+znc.pid
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*~
