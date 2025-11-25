@@ -42,7 +42,7 @@ EXPOSE 6667 6697 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD netstat -an | grep LISTEN | grep :6697 || exit 1
+    CMD pidof znc || exit 1
 
 # Set entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
