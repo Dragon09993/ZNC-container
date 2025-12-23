@@ -46,8 +46,8 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
         exit 1
     fi
     
-    # Server: hostname/IP validation
-    if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9.-]+$'; then
+    # Server: hostname/IP validation (allowing underscores)
+    if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9._-]+$'; then
         echo "ERROR: ZNC_IRC_SERVER contains invalid characters."
         exit 1
     fi
@@ -58,10 +58,17 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
         exit 1
     fi
     
-    # Password check: warn if using default
-    if [ "$ZNC_PASSWORD" = "changeme" ] || [ "$ZNC_PASSWORD" = "CHANGE_THIS_PASSWORD" ]; then
-        echo "WARNING: Using default password! Please set a strong password in your .env file."
-        echo "WARNING: This is insecure for production use!"
+    # Password check: warn if using default or common weak passwords
+    case "$ZNC_PASSWORD" in
+        "changeme"|"CHANGE_THIS_PASSWORD"|"password"|"admin"|"znc"|"123456"|"password123")
+            echo "WARNING: Using a default or weak password! Please set a strong password in your .env file."
+            echo "WARNING: This is insecure for production use!"
+            ;;
+    esac
+    
+    # Check password length
+    if [ ${#ZNC_PASSWORD} -lt 8 ]; then
+        echo "WARNING: Password is shorter than 8 characters. Consider using a longer password for better security."
     fi
     
     # Determine SSL prefix for server
