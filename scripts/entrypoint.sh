@@ -33,6 +33,37 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
     ZNC_IRC_PORT="${ZNC_IRC_PORT:-6697}"
     ZNC_IRC_SSL="${ZNC_IRC_SSL:-true}"
     
+    # Validate and sanitize inputs to prevent injection
+    # Username: alphanumeric, dash, underscore only
+    if ! echo "$ZNC_USER" | grep -qE '^[a-zA-Z0-9_-]+$'; then
+        echo "ERROR: ZNC_USER contains invalid characters. Use only alphanumeric, dash, or underscore."
+        exit 1
+    fi
+    
+    # Nickname: alphanumeric, dash, underscore only (simplified for safety)
+    if ! echo "$ZNC_IRC_NICK" | grep -qE '^[a-zA-Z0-9_-]+$'; then
+        echo "ERROR: ZNC_IRC_NICK contains invalid characters. Use only alphanumeric, dash, or underscore."
+        exit 1
+    fi
+    
+    # Server: hostname/IP validation
+    if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9.-]+$'; then
+        echo "ERROR: ZNC_IRC_SERVER contains invalid characters."
+        exit 1
+    fi
+    
+    # Port: numeric only
+    if ! echo "$ZNC_IRC_PORT" | grep -qE '^[0-9]+$'; then
+        echo "ERROR: ZNC_IRC_PORT must be numeric."
+        exit 1
+    fi
+    
+    # Password check: warn if using default
+    if [ "$ZNC_PASSWORD" = "changeme" ] || [ "$ZNC_PASSWORD" = "CHANGE_THIS_PASSWORD" ]; then
+        echo "WARNING: Using default password! Please set a strong password in your .env file."
+        echo "WARNING: This is insecure for production use!"
+    fi
+    
     # Determine SSL prefix for server
     if [ "$ZNC_IRC_SSL" = "true" ]; then
         IRC_SERVER_LINE="Server = ${ZNC_IRC_SERVER} +${ZNC_IRC_PORT}"
