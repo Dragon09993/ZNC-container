@@ -46,7 +46,7 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
         exit 1
     fi
     
-    # Server: hostname/IP validation (proper hostname format)
+    # Server: hostname/IP validation (proper hostname format, including single-char)
     if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$'; then
         echo "ERROR: ZNC_IRC_SERVER contains invalid characters or format."
         exit 1
