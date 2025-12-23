@@ -25,10 +25,22 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
     mkdir -p "$ZNC_CONFIG_DIR/configs"
     echo "INFO: No existing configuration found, creating new setup..."
     
-    # Generate a simple password hash (using sha256)
-    PASSWORD_HASH="sha256#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855#YWRtaW4=#"
+    # Get environment variables with defaults
+    ZNC_USER="${ZNC_USER:-admin}"
+    ZNC_PASSWORD="${ZNC_PASSWORD:-changeme}"
+    ZNC_IRC_NICK="${ZNC_IRC_NICK:-znc-user}"
+    ZNC_IRC_SERVER="${ZNC_IRC_SERVER:-irc.libera.chat}"
+    ZNC_IRC_PORT="${ZNC_IRC_PORT:-6697}"
+    ZNC_IRC_SSL="${ZNC_IRC_SSL:-true}"
     
-    cat > "$ZNC_CONFIG_FILE" << 'EOF'
+    # Determine SSL prefix for server
+    if [ "$ZNC_IRC_SSL" = "true" ]; then
+        IRC_SERVER_LINE="Server = ${ZNC_IRC_SERVER} +${ZNC_IRC_PORT}"
+    else
+        IRC_SERVER_LINE="Server = ${ZNC_IRC_SERVER} ${ZNC_IRC_PORT}"
+    fi
+    
+    cat > "$ZNC_CONFIG_FILE" << EOF
 Version = 1.9
 AnonIPLimit = 10
 ConnectDelay = 5
@@ -67,23 +79,23 @@ LoadModule = webadmin
     SSL = true
 </Listener>
 
-<User admin>
+<User ${ZNC_USER}>
     Admin = true
-    Nick = znc
-    AltNick = znc_
-    Ident = znc
+    Nick = ${ZNC_IRC_NICK}
+    AltNick = ${ZNC_IRC_NICK}_
+    Ident = ${ZNC_IRC_NICK}
     RealName = ZNC User
     LoadModule = chansaver
     LoadModule = controlpanel
     LoadModule = log
     LoadModule = buffextras
     LoadModule = savebuff
-    Pass = plain#znc#
+    Pass = plain#${ZNC_PASSWORD}#
     Allow = 10.0.0.*
 
-    <Network freenode>
+    <Network local>
         LoadModule = simple_away
-        Server = chat.freenode.net +6697
+        ${IRC_SERVER_LINE}
         
         <Chan #znc>
         </Chan>
@@ -91,8 +103,9 @@ LoadModule = webadmin
 </User>
 EOF
 
-    echo "Initial ZNC configuration created with user 'admin' and password 'password'"
-    echo "You can change this via the web interface at http://localhost:8085"
+    echo "Initial ZNC configuration created with user '${ZNC_USER}'"
+    echo "You can access the web interface at http://localhost:8085"
+    echo "Login with username: ${ZNC_USER} and the password you set in .env"
     
     # Fix ownership of created files
     chown -R znc:znc "$ZNC_CONFIG_DIR"
