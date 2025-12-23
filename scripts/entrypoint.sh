@@ -25,10 +25,11 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
     mkdir -p "$ZNC_CONFIG_DIR/configs"
     echo "INFO: No existing configuration found, creating new setup..."
     
-    # Generate a simple password hash (using sha256)
-    PASSWORD_HASH="sha256#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855#YWRtaW4=#"
+    # Use environment variables for username and password
+    ZNC_USER="${ZNC_USER:-admin}"
+    ZNC_PASSWORD="${ZNC_PASSWORD:-znc}"
     
-    cat > "$ZNC_CONFIG_FILE" << 'EOF'
+    cat > "$ZNC_CONFIG_FILE" << EOF
 Version = 1.9
 AnonIPLimit = 10
 ConnectDelay = 5
@@ -67,7 +68,7 @@ LoadModule = webadmin
     SSL = true
 </Listener>
 
-<User admin>
+<User $ZNC_USER>
     Admin = true
     Nick = znc
     AltNick = znc_
@@ -78,7 +79,7 @@ LoadModule = webadmin
     LoadModule = log
     LoadModule = buffextras
     LoadModule = savebuff
-    Pass = plain#znc#
+    Pass = plain#$ZNC_PASSWORD#
     Allow = 10.0.0.*
 
     <Network freenode>
@@ -91,7 +92,7 @@ LoadModule = webadmin
 </User>
 EOF
 
-    echo "Initial ZNC configuration created with user 'admin' and password 'password'"
+    echo "Initial ZNC configuration created with user '$ZNC_USER' and password from ZNC_PASSWORD"
     echo "You can change this via the web interface at http://localhost:8085"
     
     # Fix ownership of created files

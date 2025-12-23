@@ -101,10 +101,10 @@ Configure your IRC client to connect through ZNC:
 - **Server**: `your-server-ip` or `localhost`
 - **Port**: `6697` (SSL) or `6667` (non-SSL)
 - **Username**: `username/network` (e.g., `admin/local`)
-- **Password**: Use `znc` (simple password for local network)
+- **Password**: Use the password configured in your `.env` file (defaults to `znc` if not set)
 - **SSL**: Enable if using port 6697
 
-**Note**: Use the simple password `znc` for connections from the 10.0.0.* subnet.
+**Note**: Connections from the 10.0.0.* subnet are allowed and will use the password from your `.env` file (ZNC_PASSWORD). The default password is `znc` if ZNC_PASSWORD is not set in `.env`.
 
 #### Alternative: Certificate-based Authentication (No Password Required)
 
