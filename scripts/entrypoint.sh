@@ -92,7 +92,7 @@ LoadModule = webadmin
 </User>
 EOF
 
-    echo "Initial ZNC configuration created with user '$ZNC_USER' and password from ZNC_PASSWORD"
+    echo "Initial ZNC configuration created with user '$ZNC_USER' and password from environment"
     echo "You can change this via the web interface at http://localhost:8085"
     
     # Fix ownership of created files
