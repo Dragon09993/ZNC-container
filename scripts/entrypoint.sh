@@ -46,15 +46,15 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
         exit 1
     fi
     
-    # Server: hostname/IP validation (allowing underscores)
-    if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9._-]+$'; then
-        echo "ERROR: ZNC_IRC_SERVER contains invalid characters."
+    # Server: hostname/IP validation (proper hostname format)
+    if ! echo "$ZNC_IRC_SERVER" | grep -qE '^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$'; then
+        echo "ERROR: ZNC_IRC_SERVER contains invalid characters or format."
         exit 1
     fi
     
-    # Port: numeric only
-    if ! echo "$ZNC_IRC_PORT" | grep -qE '^[0-9]+$'; then
-        echo "ERROR: ZNC_IRC_PORT must be numeric."
+    # Port: numeric only with valid range (1-65535)
+    if ! echo "$ZNC_IRC_PORT" | grep -qE '^[1-9][0-9]*$' || [ "$ZNC_IRC_PORT" -gt 65535 ]; then
+        echo "ERROR: ZNC_IRC_PORT must be a valid port number (1-65535)."
         exit 1
     fi
     
@@ -78,6 +78,9 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
         IRC_SERVER_LINE="Server = ${ZNC_IRC_SERVER} ${ZNC_IRC_PORT}"
     fi
     
+    # Create configuration file with variable expansion
+    # Note: Using unquoted EOF to allow variable substitution
+    # All variables have been validated above to prevent injection
     cat > "$ZNC_CONFIG_FILE" << EOF
 Version = 1.9
 AnonIPLimit = 10
