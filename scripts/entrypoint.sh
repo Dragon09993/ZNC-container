@@ -79,8 +79,7 @@ LoadModule = webadmin
     LoadModule = buffextras
     LoadModule = savebuff
     Pass = plain#znc
-    Allow = 10.0.0.*
-    Allow = 192.168.1.*
+    Allow = 0.0.0.0
 
     <Network freenode>
         LoadModule = simple_away
