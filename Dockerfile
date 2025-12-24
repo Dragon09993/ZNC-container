@@ -1,21 +1,48 @@
-FROM ubuntu:22.04
+ARG BASE_IMAGE=ubuntu:22.04
+FROM ${BASE_IMAGE}
 
 # Install dependencies and ZNC
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    znc \
-    znc-dev \
-    znc-python \
-    znc-perl \
-    znc-tcl \
-    openssl \
-    ca-certificates \
-    curl \
-    gosu \
-    && rm -rf /var/lib/apt/lists/*
+# This section handles both Ubuntu (apt) and Alpine (apk) package managers
+RUN if command -v apt-get > /dev/null 2>&1; then \
+        # Ubuntu/Debian installation
+        apt-get update && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        znc \
+        znc-dev \
+        znc-python \
+        znc-perl \
+        znc-tcl \
+        openssl \
+        ca-certificates \
+        curl \
+        gosu \
+        && rm -rf /var/lib/apt/lists/*; \
+    elif command -v apk > /dev/null 2>&1; then \
+        # Alpine installation
+        apk add --no-cache \
+        znc \
+        znc-extra \
+        znc-modpython \
+        znc-modperl \
+        znc-modtcl \
+        openssl \
+        ca-certificates \
+        curl \
+        su-exec; \
+    else \
+        echo "Unsupported base image" && exit 1; \
+    fi
 
-# Create ZNC user and directories
-RUN useradd -r -s /bin/false -d /opt/znc znc && \
+# Create ZNC user and directories (cross-platform)
+RUN if command -v useradd > /dev/null 2>&1; then \
+        # Ubuntu/Debian user creation
+        useradd -r -s /bin/false -d /opt/znc znc; \
+    elif command -v adduser > /dev/null 2>&1; then \
+        # Alpine user creation
+        adduser -D -s /sbin/nologin -h /opt/znc znc; \
+    else \
+        echo "Unsupported user creation method" && exit 1; \
+    fi && \
     mkdir -p /opt/znc/.znc && \
     chown -R znc:znc /opt/znc
 

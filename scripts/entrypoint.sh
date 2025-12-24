@@ -1,12 +1,22 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
+
+# Read environment variables with defaults
+ZNC_USER="${ZNC_USER:-admin}"
+ZNC_PASSWORD="${ZNC_PASSWORD:-changeme}"
 
 ZNC_CONFIG_DIR="/opt/znc/.znc"
 ZNC_CERT_FILE="$ZNC_CONFIG_DIR/znc.pem"
 ZNC_CONFIG_FILE="$ZNC_CONFIG_DIR/configs/znc.conf"
 
-echo "Starting ZNC setup..."
+# Detect OS for logging
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    echo "Starting ZNC setup on $NAME..."
+else
+    echo "Starting ZNC setup..."
+fi
 
 # Generate SSL certificate if needed
 if [ ! -f "$ZNC_CERT_FILE" ]; then
@@ -28,7 +38,7 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
     # Generate a simple password hash (using sha256)
     PASSWORD_HASH="sha256#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855#YWRtaW4=#"
     
-    cat > "$ZNC_CONFIG_FILE" << 'EOF'
+    cat > "$ZNC_CONFIG_FILE" << EOF
 Version = 1.9
 AnonIPLimit = 10
 ConnectDelay = 5
@@ -67,7 +77,7 @@ LoadModule = webadmin
     SSL = true
 </Listener>
 
-<User admin>
+<User ${ZNC_USER}>
     Admin = true
     Nick = znc
     AltNick = znc_
@@ -78,7 +88,7 @@ LoadModule = webadmin
     LoadModule = log
     LoadModule = buffextras
     LoadModule = savebuff
-    Pass = plain#znc#
+    Pass = plain#${ZNC_PASSWORD}#
     Allow = 10.0.0.*
 
     <Network freenode>
@@ -91,7 +101,7 @@ LoadModule = webadmin
 </User>
 EOF
 
-    echo "Initial ZNC configuration created with user 'admin' and password 'password'"
+    echo "Initial ZNC configuration created with user '${ZNC_USER}' and password '${ZNC_PASSWORD}'"
     echo "You can change this via the web interface at http://localhost:8085"
     
     # Fix ownership of created files
@@ -99,9 +109,22 @@ EOF
     echo "Configuration created successfully!"
 else
     echo "INFO: Existing ZNC configuration found, using persistent data..."
+    echo "WARNING: To change the password, you must either:"
+    echo "  1. Use the ZNC web interface to change it"
+    echo "  2. Remove the volume and restart: docker-compose down -v && docker-compose up -d"
+    echo "  3. Manually edit $ZNC_CONFIG_FILE"
 fi
 
 echo "Starting ZNC..."
 
-# Switch to znc user and start ZNC
-exec gosu znc "$@"
+# Detect available user switching tool
+if command -v gosu > /dev/null 2>&1; then
+    echo "Using gosu for user switching"
+    exec gosu znc "$@"
+elif command -v su-exec > /dev/null 2>&1; then
+    echo "Using su-exec for user switching"
+    exec su-exec znc "$@"
+else
+    echo "WARNING: Neither gosu nor su-exec found, running as root (not recommended)"
+    exec "$@"
+fi

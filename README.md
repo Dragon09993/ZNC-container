@@ -10,6 +10,7 @@ A complete Docker-based ZNC (IRC bouncer) setup with SSL support, web interface,
 - 📁 **Persistent Storage**: Configuration and logs preserved across restarts
 - 🛠️ **Management Scripts**: Easy backup, restore, and maintenance
 - 📦 **Pre-configured**: Ready-to-use templates and sensible defaults
+- 🔄 **Cross-platform**: Works on both Ubuntu and Alpine base images
 
 ## Quick Start
 
@@ -31,6 +32,9 @@ nano .env  # Edit with your settings
 Edit `.env` file with your settings:
 
 ```bash
+# Base Image Selection (ubuntu:22.04 or alpine:3.19)
+BASE_IMAGE=ubuntu:22.04
+
 # ZNC Admin User Configuration
 ZNC_USER=admin
 ZNC_PASSWORD=your_secure_password_here
@@ -59,6 +63,53 @@ PGID=1000
 - **Web Interface**: http://localhost:8085
 - **IRC SSL Port**: 6697
 - **IRC Non-SSL Port**: 6667
+
+## Building for Different Platforms
+
+This container supports both Ubuntu and Alpine Linux base images. You can choose which one to use:
+
+### Ubuntu (Default)
+
+Ubuntu 22.04 provides a comprehensive set of ZNC modules and is well-tested:
+
+```bash
+# In .env file
+BASE_IMAGE=ubuntu:22.04
+
+# Or build directly with docker
+docker build --build-arg BASE_IMAGE=ubuntu:22.04 -t znc:ubuntu .
+```
+
+### Alpine Linux
+
+Alpine 3.19 provides a smaller image size and faster build times:
+
+```bash
+# In .env file
+BASE_IMAGE=alpine:3.19
+
+# Or build directly with docker
+docker build --build-arg BASE_IMAGE=alpine:3.19 -t znc:alpine .
+```
+
+### Switching Between Platforms
+
+To switch between Ubuntu and Alpine:
+
+1. Stop and remove existing container:
+   ```bash
+   docker-compose down
+   ```
+
+2. Update `BASE_IMAGE` in `.env` file
+
+3. Rebuild and start:
+   ```bash
+   docker-compose build --no-cache
+   docker-compose up -d
+   ```
+
+**Note**: Your ZNC configuration is stored in a persistent volume and will be preserved when switching platforms.
 
 ## Management Commands
 
@@ -231,6 +282,48 @@ ZNC automatically stores messages in buffers and replays them when you reconnect
 
 ## Troubleshooting
 
+### Password Not Working / Password Changes
+
+**Important**: The `ZNC_PASSWORD` environment variable only applies during **first run** when no configuration exists.
+
+#### If you need to change the password:
+
+**Option 1: Use the Web Interface (Recommended)**
+1. Log in to http://localhost:8085 with current password
+2. Go to User Settings → Password
+3. Update password and save
+
+**Option 2: Reset Everything (Removes all data)**
+```bash
+# Stop ZNC
+docker-compose down
+
+# Remove volume (WARNING: Deletes ALL users, settings, and logs)
+docker-compose down -v
+
+# Start fresh (will use password from .env file)
+docker-compose up -d
+```
+
+**Option 3: Manual Configuration Edit**
+```bash
+# Access container shell
+docker-compose exec znc sh
+
+# Edit config file (requires ZNC password format knowledge)
+vi /opt/znc/.znc/configs/znc.conf
+```
+
+#### Why isn't my password from .env working?
+
+If you see this message on startup:
+```
+INFO: Existing ZNC configuration found, using persistent data...
+WARNING: To change the password, you must either...
+```
+
+This means a persistent volume already exists with a previous configuration. The password in `.env` is **only used for initial setup**. Once ZNC creates its config file, it's stored in a Docker volume and persists across container restarts.
+
 ### Container Won't Start
 
 ```bash
@@ -259,16 +352,31 @@ docker-compose ps
 
 ### Reset Configuration
 
+**Warning**: This will delete ALL ZNC data including users, settings, channels, and logs!
+
 ```bash
-# Stop ZNC
-./scripts/znc-manager.sh stop
+# Stop ZNC and remove all data
+docker-compose down -v
 
-# Remove configuration volume (WARNING: Deletes ALL users and settings)
-docker volume rm znc_znc_data
-
-# Restart (will create fresh config)
-./scripts/znc-manager.sh start
+# Start fresh (will use settings from .env file)
+docker-compose up -d
 ```
+
+### Cross-Platform Issues
+
+The container works identically on both Ubuntu and Alpine base images. If you experience issues:
+
+1. **Check which platform you're using**:
+   ```bash
+   docker-compose exec znc cat /etc/os-release
+   ```
+
+2. **Verify the correct user-switching tool is detected**:
+   - Ubuntu uses `gosu`
+   - Alpine uses `su-exec`
+   - Check container logs: `docker-compose logs znc`
+
+3. **Shell compatibility**: The entrypoint uses `/bin/sh` for maximum compatibility with both `bash` (Ubuntu) and `ash` (Alpine)
 
 ### Delete Specific Users
 
