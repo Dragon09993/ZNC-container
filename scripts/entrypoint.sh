@@ -98,8 +98,8 @@ LoadModule = webadmin
 </User>
 EOF
 
-    echo "Initial ZNC configuration created with user '${ZNC_USER}' and password '${ZNC_PASSWORD}'"
-    echo "You can change this via the web interface at http://localhost:8080"
+    echo "Initial ZNC configuration created with user '${ZNC_USER}'"
+    echo "You can change the password via the web interface at http://localhost:8080"
     
     # Fix ownership of created files
     chown -R znc:znc "$ZNC_CONFIG_DIR"
