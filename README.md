@@ -92,6 +92,8 @@ BASE_IMAGE=alpine:3.19
 docker build --build-arg BASE_IMAGE=alpine:3.19 -t znc:alpine .
 ```
 
+**Note**: Alpine includes the core ZNC package. Ubuntu includes additional modules (znc-dev, znc-python, znc-perl, znc-tcl) for extended functionality.
+
 ### Switching Between Platforms
 
 To switch between Ubuntu and Alpine:

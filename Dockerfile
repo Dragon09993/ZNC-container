@@ -21,10 +21,6 @@ RUN if command -v apt-get > /dev/null 2>&1; then \
         # Alpine installation
         apk add --no-cache \
         znc \
-        znc-extra \
-        znc-modpython \
-        znc-modperl \
-        znc-modtcl \
         openssl \
         ca-certificates \
         curl \
