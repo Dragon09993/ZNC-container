@@ -35,9 +35,6 @@ if [ ! -f "$ZNC_CONFIG_FILE" ]; then
     mkdir -p "$ZNC_CONFIG_DIR/configs"
     echo "INFO: No existing configuration found, creating new setup..."
     
-    # Generate a simple password hash (using sha256)
-    PASSWORD_HASH="sha256#e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855#YWRtaW4=#"
-    
     cat > "$ZNC_CONFIG_FILE" << EOF
 Version = 1.9
 AnonIPLimit = 10
@@ -91,9 +88,9 @@ LoadModule = webadmin
     Pass = plain#${ZNC_PASSWORD}#
     Allow = 10.0.0.*
 
-    <Network freenode>
+    <Network libera>
         LoadModule = simple_away
-        Server = chat.freenode.net +6697
+        Server = irc.libera.chat +6697
         
         <Chan #znc>
         </Chan>
@@ -102,7 +99,7 @@ LoadModule = webadmin
 EOF
 
     echo "Initial ZNC configuration created with user '${ZNC_USER}' and password '${ZNC_PASSWORD}'"
-    echo "You can change this via the web interface at http://localhost:8085"
+    echo "You can change this via the web interface at http://localhost:8080"
     
     # Fix ownership of created files
     chown -R znc:znc "$ZNC_CONFIG_DIR"
