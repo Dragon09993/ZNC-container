@@ -4,12 +4,12 @@ A complete Docker-based ZNC (IRC bouncer) setup with SSL support, web interface,
 
 ## Features
 
-- 🐳 **Docker-based**: Easy deployment and management
-- 🔒 **SSL Support**: Automatic SSL certificate generation
-- 🌐 **Web Interface**: ZNC web admin on port 8080
-- 📁 **Persistent Storage**: Configuration and logs preserved across restarts
-- 🛠️ **Management Scripts**: Easy backup, restore, and maintenance
-- 📦 **Pre-configured**: Ready-to-use templates and sensible defaults
+-  **Docker-based**: Easy deployment and management
+-  **SSL Support**: Automatic SSL certificate generation
+-  **Web Interface**: ZNC web admin on port 8080
+-  **Persistent Storage**: Configuration and logs preserved across restarts
+-  **Management Scripts**: Easy backup, restore, and maintenance
+-  **Pre-configured**: Ready-to-use templates and sensible defaults
 
 ## Quick Start
 
